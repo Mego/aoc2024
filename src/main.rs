@@ -10,13 +10,12 @@ use paste::paste;
 
 #[tokio::main]
 async fn main() {
-    // let input = fetch_input(2024, 22).await;
-
+    // let input = fetch_input(2024, 25).await;
     let input = r"".to_owned();
 
-    let res = day22::part1(input);
+    let res = day24::part1(input);
     println!("{res}");
-    // println!("{}", submit(2024, 21, 2, res).await);
+    // println!("{}", submit(2024, 25, 1, res).await);
 }
 
 #[cfg(test)]

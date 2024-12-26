@@ -1,0 +1,28 @@
+[package]
+name = "aoc2024"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+cached = { version = "0.54.0", features = ["async_tokio_rt_multi_thread"] }
+exhaust = "0.2.1"
+grid = { version = "0.15.0", features = ["serde"] }
+itertools = "0.13.0"
+num = "0.4.3"
+pathfinding = "4.12.0"
+peg = "0.8.4"
+petgraph = { version = "0.6.5", features = ["rayon"] }
+rayon = "1.10.0"
+regex = "1.11.1"
+reqwest = { version = "0.12.9", features = ["json"] }
+rustc-hash = "2.1.0"
+serde = "1.0.215"
+tokio = { version = "1.41.1", features = ["full", "rt-multi-thread"] }
+
+[[bench]]
+name = "benches"
+harness = false
+
+[dev-dependencies]
+criterion = "0.5.1"
+paste = "1.0.15"

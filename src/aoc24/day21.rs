@@ -85,7 +85,7 @@ fn find_shortest_numpad_paths(from: (usize, usize), to: (usize, usize)) -> Arc<V
             .map(|w| {
                 let a = w[0];
                 let b = w[1];
-                Direction::from_coords(a.into(), b.into()).to_char()
+                Direction::from_coords((a.1, a.0).into(), (b.1, b.0).into()).to_char()
             })
             .chain([b'A'])
             .collect_vec()
@@ -109,7 +109,7 @@ fn find_shortest_dpad_paths(from: (usize, usize), to: (usize, usize)) -> Arc<Vec
             .map(|w| {
                 let a = w[0];
                 let b = w[1];
-                Direction::from_coords(a.into(), b.into()).to_char()
+                Direction::from_coords((a.1, a.0).into(), (b.1, b.0).into()).to_char()
             })
             .chain([b'A'])
             .collect_vec()
@@ -177,12 +177,25 @@ pub fn part1(input: String) -> u64 {
                 .unwrap();
 
             let path_len = find_shortest_seq(line.bytes().collect_vec(), 2, true);
-            dbg!(numeric_part, path_len);
             numeric_part * path_len
         })
         .sum::<usize>() as u64
 }
 
 pub fn part2(input: String) -> u64 {
-    0
+    let num_regex = Regex::new(r"\d+").unwrap();
+    input
+        .lines()
+        .map(|line| {
+            let numeric_part = num_regex
+                .find(line)
+                .unwrap()
+                .as_str()
+                .parse::<usize>()
+                .unwrap();
+
+            let path_len = find_shortest_seq(line.bytes().collect_vec(), 25, true);
+            numeric_part * path_len
+        })
+        .sum::<usize>() as u64
 }

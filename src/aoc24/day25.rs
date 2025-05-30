@@ -1,6 +1,5 @@
 use grid::Grid;
 use itertools::Itertools;
-use reqwest::header;
 
 fn parse(input: String) -> (Vec<Vec<usize>>, Vec<Vec<usize>>, usize) {
     let mut keys = vec![];
@@ -37,4 +36,8 @@ pub fn part1(input: String) -> u64 {
         .cartesian_product(keys)
         .filter(|(l, k)| l.iter().zip(k).all(|(a, b)| a + b <= height))
         .count() as u64
+}
+
+pub fn part2(_: String) -> u64 {
+    0
 }

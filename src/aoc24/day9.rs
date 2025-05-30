@@ -1,7 +1,4 @@
-use std::{
-    collections::HashMap,
-    fmt::{Display, Write},
-};
+use std::{collections::BTreeMap, fmt::Display};
 
 use itertools::Itertools;
 
@@ -9,7 +6,7 @@ type FileId = u64;
 type FileSize = u64;
 type FileLoc = usize;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 struct FSFile {
     id: Option<FileId>,
     size: FileSize,
@@ -18,8 +15,8 @@ struct FSFile {
 
 struct FS {
     blocks: Vec<FSFile>,
-    free_blocks: Vec<FileLoc>,
-    max_id: FileId,
+    free_block_indexes: Vec<FileLoc>,
+    free_blocks: BTreeMap<FileLoc, FileSize>,
 }
 
 impl FS {
@@ -28,7 +25,8 @@ impl FS {
         let mut empty = false;
         let mut blocks = Vec::new();
 
-        let mut free_blocks = Vec::new();
+        let mut free_blocks = BTreeMap::new();
+        let mut free_block_indexes = Vec::new();
         input.bytes().for_each(|byte| {
             let id = (!empty).then_some(next_id);
             let next_loc = blocks.len();
@@ -40,11 +38,13 @@ impl FS {
                     start: next_loc,
                 });
                 if id.is_none() {
-                    free_blocks.push(next_loc + i as FileLoc);
+                    free_block_indexes.push(next_loc + i as FileLoc);
                 }
             });
             if !empty {
                 next_id += 1;
+            } else {
+                free_blocks.insert(next_loc, size);
             }
             empty = !empty;
         });
@@ -52,7 +52,7 @@ impl FS {
         Self {
             blocks,
             free_blocks,
-            max_id: next_id,
+            free_block_indexes,
         }
     }
 
@@ -78,8 +78,13 @@ pub fn part1(input: String) -> u64 {
     let mut fs = FS::new(input);
     loop {
         if let Some(file_loc) = fs.blocks.iter().rposition(|f| f.id.is_some()) {
-            if let Some(free_idx) = fs.free_blocks.iter().position(|&loc| loc < file_loc) {
-                let free_loc = fs.free_blocks.remove(free_idx);
+            if let Some((free_idx, free_loc)) = fs
+                .free_block_indexes
+                .iter()
+                .enumerate()
+                .find_map(|(idx, &loc)| (loc < file_loc).then_some((idx, loc)))
+            {
+                fs.free_block_indexes.remove(free_idx);
                 fs.blocks.swap(file_loc, free_loc);
             } else {
                 break;
@@ -91,33 +96,31 @@ pub fn part1(input: String) -> u64 {
     fs.checksum()
 }
 
-// THIS GARBAGE DOESN'T WORK
-
 pub fn part2(input: String) -> u64 {
     let mut fs = FS::new(input);
-
-    let mut res = 0;
-
-    for id in (0..fs.max_id).rev() {
-        let file_loc = fs
-            .blocks
-            .iter()
-            .enumerate()
-            .position(|(l, f)| (f.start == l && f.id.is_some_and(|f_id| f_id == id)))
-            .unwrap();
-        let file = fs.blocks.remove(file_loc);
-        if let Some(free_idx) = fs
-            .blocks
-            .iter()
-            .position(|f| f.id.is_none() && f.start < file_loc && f.size >= file.size)
-        {
-            let free_file = fs.blocks.remove(free_idx);
-            res += file.id.unwrap() * (free_file.start as u64);
-            for i in 1..file.size {
-                res += file.id.unwrap() * (free_file.start as u64 + i);
+    let mut swaps = Vec::new();
+    fs.blocks
+        .iter()
+        .unique()
+        .filter(|b| b.id.is_some())
+        .rev()
+        .for_each(|file| {
+            if let Some((&free_loc, _)) = fs
+                .free_blocks
+                .iter()
+                .find(|&(&free_loc, &size)| free_loc < file.start && size >= file.size)
+            {
+                (0..file.size)
+                    .for_each(|i| swaps.push((file.start + i as usize, free_loc + i as usize)));
+                let new_free_size = fs.free_blocks.remove(&free_loc).unwrap() - file.size;
+                if new_free_size > 0 {
+                    fs.free_blocks
+                        .insert(free_loc + file.size as usize, new_free_size);
+                }
             }
-        }
+        });
+    for (loc, free_loc) in swaps {
+        fs.blocks.swap(loc, free_loc);
     }
-
-    res
+    fs.checksum()
 }

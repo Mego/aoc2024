@@ -2,60 +2,16 @@ mod aoc24;
 mod math;
 mod util;
 
+#[cfg(test)]
 use aoc24::*;
-use util::{fetch_input, submit, submit_str};
+#[cfg(test)]
+use util::{fetch_input, submit};
 
 #[cfg(test)]
 use paste::paste;
 
 #[tokio::main]
-async fn main() {
-    let input = fetch_input(2024, 25).await;
-    //     let input = r"#####
-    // .####
-    // .####
-    // .####
-    // .#.#.
-    // .#...
-    // .....
-
-    // #####
-    // ##.##
-    // .#.##
-    // ...##
-    // ...#.
-    // ...#.
-    // .....
-
-    // .....
-    // #....
-    // #....
-    // #...#
-    // #.#.#
-    // #.###
-    // #####
-
-    // .....
-    // .....
-    // #.#..
-    // ###..
-    // ###.#
-    // ###.#
-    // #####
-
-    // .....
-    // .....
-    // .....
-    // #....
-    // #.#..
-    // #.#.#
-    // #####"
-    //         .to_owned();
-
-    let res = day25::part1(input);
-    println!("{res}");
-    println!("{}", submit(2024, 25, 1, res).await);
-}
+async fn main() {}
 
 #[cfg(test)]
 macro_rules! day {
@@ -76,14 +32,14 @@ macro_rules! run_day_test {
                 // let input = "2333133121414131402".to_owned();
                 {
                     let res = $day::part1(input.clone());
-                    let output = runtime.block_on(submit(2024, day, 1, res));
+                    let output = submit(2024, day, 1, format!("{res}"));
                     println!("{day}::part1 {}", res);
                     assert!(output.starts_with("right"));
                     // assert!(res == 1928);
                 }
                 {
                     let res = $day::part2(input);
-                    let output = runtime.block_on(submit(2024, day, 2, res));
+                    let output = submit(2024, day, 2, format!("{res}"));
                     println!("{day}::part2 {}", res);
                     assert!(output.starts_with("right"));
                     // assert!(res == 2858);
@@ -109,4 +65,16 @@ mod test {
     run_day_test!(day11);
     run_day_test!(day12);
     run_day_test!(day13);
+    run_day_test!(day14);
+    run_day_test!(day15);
+    run_day_test!(day16);
+    run_day_test!(day17);
+    run_day_test!(day18);
+    run_day_test!(day19);
+    run_day_test!(day20);
+    run_day_test!(day21);
+    run_day_test!(day22);
+    run_day_test!(day23);
+    run_day_test!(day24);
+    run_day_test!(day25);
 }

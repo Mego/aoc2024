@@ -76,8 +76,13 @@ impl Display for FS {
 
 pub fn part1(input: String) -> u64 {
     let mut fs = FS::new(input);
-    loop {
-        if let Some(file_loc) = fs.blocks.iter().rposition(|f| f.id.is_some()) {
+    let mut swaps = Vec::new();
+    fs.blocks
+        .iter()
+        .enumerate()
+        .filter_map(|(loc, f)| f.id.and(Some(loc)))
+        .rev()
+        .for_each(|file_loc| {
             if let Some((free_idx, free_loc)) = fs
                 .free_block_indexes
                 .iter()
@@ -85,13 +90,11 @@ pub fn part1(input: String) -> u64 {
                 .find_map(|(idx, &loc)| (loc < file_loc).then_some((idx, loc)))
             {
                 fs.free_block_indexes.remove(free_idx);
-                fs.blocks.swap(file_loc, free_loc);
-            } else {
-                break;
+                swaps.push((file_loc, free_loc));
             }
-        } else {
-            break;
-        }
+        });
+    for (a, b) in swaps {
+        fs.blocks.swap(a, b);
     }
     fs.checksum()
 }
@@ -119,8 +122,8 @@ pub fn part2(input: String) -> u64 {
                 }
             }
         });
-    for (loc, free_loc) in swaps {
-        fs.blocks.swap(loc, free_loc);
+    for (a, b) in swaps {
+        fs.blocks.swap(a, b);
     }
     fs.checksum()
 }

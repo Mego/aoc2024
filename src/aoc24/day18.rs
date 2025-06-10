@@ -1,5 +1,8 @@
 use itertools::Itertools;
-use pathfinding::{grid::Grid, prelude::dijkstra};
+use pathfinding::{
+    grid::Grid,
+    prelude::{bfs_bidirectional, dijkstra},
+};
 
 pub fn parse(input: &[&str], size: usize) -> Grid {
     let mut g = Grid::new(size, size);
@@ -24,6 +27,12 @@ pub fn parse2(input: &[(usize, usize)], size: usize) -> Grid {
     g
 }
 
+pub fn process_block(g: &mut Grid, input: (usize, usize)) {
+    g.invert();
+    g.add_vertex(input);
+    g.invert();
+}
+
 pub fn part1(input: String) -> u64 {
     const BLOCKS: usize = 1024;
     const SIZE: usize = 71;
@@ -39,6 +48,7 @@ pub fn part1(input: String) -> u64 {
 
     sol.1 as u64
 }
+
 pub fn part2(input: String) -> String {
     const SIZE: usize = 71;
     let coords = input
@@ -50,16 +60,15 @@ pub fn part2(input: String) -> String {
                 .unwrap()
         })
         .collect_vec();
-    for blocks in 1.. {
-        let g = parse2(&coords[..blocks], SIZE);
+    let mut g = Grid::new(SIZE, SIZE);
+    g.invert();
+    for block in 0.. {
+        process_block(&mut g, coords[block]);
         const START: (usize, usize) = (0, 0);
         const GOAL: (usize, usize) = (SIZE - 1, SIZE - 1);
-        if let None = dijkstra(
-            &START,
-            |&p| g.neighbours(p).into_iter().map(|n| (n, 1)),
-            |&p| p == GOAL,
-        ) {
-            return format!("{},{}", coords[blocks - 1].0, coords[blocks - 1].1);
+        let successors = |p: &(usize, usize)| g.neighbours(*p).into_iter();
+        if let None = bfs_bidirectional(&START, &GOAL, successors, successors) {
+            return format!("{},{}", coords[block].0, coords[block].1);
         }
     }
     "".to_owned()

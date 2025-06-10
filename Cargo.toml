@@ -9,7 +9,7 @@ exhaust = "0.2.1"
 grid = { version = "0.15.0", features = ["serde"] }
 itertools = "0.13.0"
 num = "0.4.3"
-pathfinding = "4.12.0"
+pathfinding = "4.14.0"
 peg = "0.8.4"
 petgraph = { version = "0.6.5", features = ["rayon"] }
 rayon = "1.10.0"

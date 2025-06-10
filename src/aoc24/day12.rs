@@ -5,7 +5,7 @@ use itertools::Itertools;
 
 use crate::util::{adj_squares, adj_squares8, diff};
 
-fn find_regions(grid: &Grid<u8>) -> Vec<(usize, usize, usize)> {
+fn find_regions(grid: &Grid<u8>, include_sides: bool) -> Vec<(usize, usize, usize)> {
     let mut regions = Vec::new();
     let mut checked = HashSet::default();
 
@@ -40,31 +40,33 @@ fn find_regions(grid: &Grid<u8>) -> Vec<(usize, usize, usize)> {
                     })
                     .collect_vec();
             }
-            for pos in squares {
-                let n = adj_squares8(grid, pos);
-                if diff(c, n.up) && diff(c, n.left) {
-                    sides += 1;
-                }
-                if diff(c, n.down) && diff(c, n.left) {
-                    sides += 1;
-                }
-                if diff(c, n.up) && diff(c, n.right) {
-                    sides += 1;
-                }
-                if diff(c, n.down) && diff(c, n.right) {
-                    sides += 1;
-                }
-                if !diff(c, n.up) && !diff(c, n.left) && diff(c, n.up_left) {
-                    sides += 1;
-                }
-                if !diff(c, n.down) && !diff(c, n.left) && diff(c, n.down_left) {
-                    sides += 1;
-                }
-                if !diff(c, n.up) && !diff(c, n.right) && diff(c, n.up_right) {
-                    sides += 1;
-                }
-                if !diff(c, n.down) && !diff(c, n.right) && diff(c, n.down_right) {
-                    sides += 1;
+            if include_sides {
+                for pos in squares {
+                    let n = adj_squares8(grid, pos);
+                    if diff(c, n.up) && diff(c, n.left) {
+                        sides += 1;
+                    }
+                    if diff(c, n.down) && diff(c, n.left) {
+                        sides += 1;
+                    }
+                    if diff(c, n.up) && diff(c, n.right) {
+                        sides += 1;
+                    }
+                    if diff(c, n.down) && diff(c, n.right) {
+                        sides += 1;
+                    }
+                    if !diff(c, n.up) && !diff(c, n.left) && diff(c, n.up_left) {
+                        sides += 1;
+                    }
+                    if !diff(c, n.down) && !diff(c, n.left) && diff(c, n.down_left) {
+                        sides += 1;
+                    }
+                    if !diff(c, n.up) && !diff(c, n.right) && diff(c, n.up_right) {
+                        sides += 1;
+                    }
+                    if !diff(c, n.down) && !diff(c, n.right) && diff(c, n.down_right) {
+                        sides += 1;
+                    }
                 }
             }
             regions.push((per, area, sides));
@@ -79,7 +81,7 @@ pub fn part1(input: String) -> u64 {
         input.lines().flat_map(|l| l.bytes()).collect_vec(),
         input.lines().next().unwrap().len(),
     );
-    let regions = find_regions(&grid);
+    let regions = find_regions(&grid, false);
     regions.into_iter().map(|(p, a, _)| p * a).sum::<usize>() as u64
 }
 pub fn part2(input: String) -> u64 {
@@ -87,6 +89,6 @@ pub fn part2(input: String) -> u64 {
         input.lines().flat_map(|l| l.bytes()).collect_vec(),
         input.lines().next().unwrap().len(),
     );
-    let regions = find_regions(&grid);
+    let regions = find_regions(&grid, true);
     regions.into_iter().map(|(_, a, s)| s * a).sum::<usize>() as u64
 }

@@ -29,20 +29,17 @@ macro_rules! run_day_test {
                 let runtime = tokio::runtime::Runtime::new().unwrap();
                 let day = day!($day);
                 let input = runtime.block_on(fetch_input(2024, day)).trim().to_string();
-                // let input = "2333133121414131402".to_owned();
                 {
                     let res = $day::part1(input.clone());
                     let output = submit(2024, day, 1, format!("{res}"));
                     println!("{day}::part1 {}", res);
                     assert!(output.starts_with("right"));
-                    // assert!(res == 1928);
                 }
                 {
                     let res = $day::part2(input);
                     let output = submit(2024, day, 2, format!("{res}"));
                     println!("{day}::part2 {}", res);
                     assert!(output.starts_with("right"));
-                    // assert!(res == 2858);
                 }
             }
         }
@@ -52,15 +49,15 @@ macro_rules! run_day_test {
 #[cfg(test)]
 mod test {
     use super::*;
-    run_day_test!(day1);
-    run_day_test!(day2);
-    run_day_test!(day3);
-    run_day_test!(day4);
-    run_day_test!(day5);
-    run_day_test!(day6);
-    run_day_test!(day7);
-    run_day_test!(day8);
-    run_day_test!(day9);
+    run_day_test!(day01);
+    run_day_test!(day02);
+    run_day_test!(day03);
+    run_day_test!(day04);
+    run_day_test!(day05);
+    run_day_test!(day06);
+    run_day_test!(day07);
+    run_day_test!(day08);
+    run_day_test!(day09);
     run_day_test!(day10);
     run_day_test!(day11);
     run_day_test!(day12);

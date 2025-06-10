@@ -1,5 +1,6 @@
-use std::collections::{BTreeMap, HashMap};
+use std::collections::{BTreeMap, HashMap, HashSet};
 
+use crate::util::{iter::IteratorExt, ParallelIteratorExt};
 use itertools::Itertools;
 use pathfinding::{
     grid::Grid,
@@ -35,42 +36,41 @@ fn grid_successors(
 
 pub fn part1(input: String) -> u64 {
     let (grid, start, end) = parse(input);
-    // println!(
-    //     "{}",
-    //     (0..grid.height)
-    //         .map(|y| (0..grid.width)
-    //             .map(|x| {
-    //                 if (x, y) == start {
-    //                     return "S";
-    //                 }
-    //                 if (x, y) == end {
-    //                     return "E";
-    //                 }
-    //                 if grid.has_vertex((x, y)) {
-    //                     return ".";
-    //                 }
-    //                 "#"
-    //             })
-    //             .join(""))
-    //         .join("\n")
-    // );
-    let legit_time = dijkstra(&start, |&p| grid_successors(&grid, p), |&p| p == end)
-        .unwrap()
-        .1;
-    // dbg!(legit_time);
-    let timesaves = (0..grid.width)
-        .cartesian_product(0..grid.height)
-        .par_bridge()
-        .filter(|&p| {
-            if !grid.has_vertex(p) {
-                let mut g = Grid::from_iter(grid.iter());
-                g.add_vertex(p);
-                let new_time = dijkstra(&start, |&p| grid_successors(&g, p), |&p| p == end)
-                    .unwrap()
-                    .1;
-                return legit_time - new_time >= 100;
+    let (path, legit_time) =
+        dijkstra(&start, |&p| grid_successors(&grid, p), |&p| p == end).unwrap();
+    let mut neg_grid = grid.clone();
+    neg_grid.invert();
+    let path_adj: HashSet<_> = path
+        .into_par_iter()
+        .flat_map(|vertex| {
+            let (x, y) = vertex;
+            let mut candidates = Vec::with_capacity(4);
+            if x > 0 {
+                candidates.push((x - 1, y));
             }
-            false
+            if x + 1 < neg_grid.width {
+                candidates.push((x + 1, y));
+            }
+            if y > 0 {
+                candidates.push((x, y - 1));
+            }
+            if y + 1 < neg_grid.height {
+                candidates.push((x, y + 1));
+            }
+            candidates.retain(|&v| neg_grid.has_vertex(v));
+            candidates
+        })
+        .duplicates()
+        .collect();
+    let timesaves = path_adj
+        .into_par_iter()
+        .filter(|&p| {
+            let mut g = grid.clone();
+            g.add_vertex(p);
+            let new_time = dijkstra(&start, |&p| grid_successors(&g, p), |&p| p == end)
+                .unwrap()
+                .1;
+            legit_time - new_time >= 100
         })
         .count();
     timesaves as u64

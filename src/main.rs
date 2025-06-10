@@ -11,7 +11,13 @@ use util::{fetch_input, submit};
 use paste::paste;
 
 #[tokio::main]
-async fn main() {}
+async fn main() {
+    use aoc24::*;
+    use util::fetch_input;
+    let input = fetch_input(2024, 20).await;
+    let result = day20::part1(input);
+    println!("{result}");
+}
 
 #[cfg(test)]
 macro_rules! day {

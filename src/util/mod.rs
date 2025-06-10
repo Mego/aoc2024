@@ -1,11 +1,13 @@
 pub mod coordinate;
 pub mod direction;
 pub mod gridtools;
+pub mod iter;
 pub mod submit;
 
 pub use coordinate::*;
 pub use direction::*;
 pub use gridtools::*;
+pub use iter::*;
 pub use submit::*;
 
 pub fn diff(c: u8, sq: Option<u8>) -> bool {
